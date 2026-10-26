@@ -37,8 +37,8 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;transition:.18s 
   <div class="panel">
     <div class="panel-head"><h3>بيانات الاستلام</h3><span class="status">● نموذج مباشر</span></div>
     <div class="fields">
-      <div class="field"><label>مركز العمليات — كود المستخدم</label><input id="opsUser" placeholder="مثال: 123" inputmode="numeric" maxlength="3" oninput="updatePreview()"></div>
-      <div class="field"><label>نائب مركز العمليات — كود المستخدم</label><input id="deputyUser" placeholder="مثال: 456" inputmode="numeric" maxlength="3" oninput="updatePreview()"></div>
+      <div class="field"><label>مركز العمليات — آيدي ديسكورد</label><input id="opsUser" placeholder="الصق آيدي المستخدم هنا" inputmode="numeric" autocomplete="off" oninput="updatePreview()"></div>
+      <div class="field"><label>نائب مركز العمليات — آيدي ديسكورد</label><input id="deputyUser" placeholder="الصق آيدي المستخدم هنا" inputmode="numeric" autocomplete="off" oninput="updatePreview()"></div>
     </div>
     <p class="note">اكتب رقم المستخدم فقط (3 أرقام)، وسيظهر في التقرير بصيغة H-000. إذا كان المقصود منشن ديسكورد، يمكنك استبدال الناتج يدويًا بعد النسخ.</p>
   </div>
@@ -116,8 +116,8 @@ function renderReport(){
  $('courseToggles').innerHTML=configs[mode].courses.map(id=>{let c=courseDefs[id];return `<label class="course-toggle"><input type="checkbox" ${data.courses[id]?'checked':''} onchange="toggleCourse('${id}',this.checked)"><span>${c.title}<small>(${c.rank})</small></span></label>`}).join('');
  $('courseGroups').innerHTML=configs[mode].courses.filter(id=>data.courses[id]).map(id=>renderCourse(id)).join('');
  $('logoutList').innerHTML=data.logout.length?data.logout.map((c,i)=>`<div class="unit-row"><div class="unit-name">تسجيل خروج ${i+1}</div><code class="code-input">${esc(codeFmt(c))}</code><button class="mini" onclick="restoreLogout(${i})">استرجاع</button><span></span></div>`).join(''):'<div class="empty-note">لا توجد أكواد مسجلة للخروج حتى الآن.</div>';
- $('opsUser').oninput=()=>{data.opsUser=$('opsUser').value.replace(/\D/g,'').slice(0,3);$('opsUser').value=data.opsUser;updatePreview()};
- $('deputyUser').oninput=()=>{data.deputyUser=$('deputyUser').value.replace(/\D/g,'').slice(0,3);$('deputyUser').value=data.deputyUser;updatePreview()};
+ $('opsUser').oninput=()=>{data.opsUser=$('opsUser').value.trim();updatePreview()};
+ $('deputyUser').oninput=()=>{data.deputyUser=$('deputyUser').value.trim();updatePreview()};
  updatePreview();
 }
 function renderGroup(g){let rows=data.groups[g.id]||[];return `<div class="panel" style="margin:12px 0;background:#10141a"><div class="panel-head"><h3>${g.title} <span class="rank">(${g.rank})</span></h3><button class="dark-btn" onclick="addUnit('${g.id}')">＋ إضافة ${g.unit}</button></div><div class="unit-list">${rows.map((r,i)=>`<div class="unit-row"><div class="unit-name">${g.unit} ${i+1}</div><input class="code-input" maxlength="3" inputmode="numeric" placeholder="000" value="${esc(r.code)}" oninput="setGroupCode('${g.id}',${i},this)"><button class="mini logout" onclick="logoutUnit('${g.id}',${i})">تسجيل خروج</button><span></span></div>`).join('')}</div><div class="note">الحد الأقصى: ${g.max} وحدة.</div></div>`}
@@ -137,11 +137,11 @@ function logoutMain(i){let item=data.main[i];if(item.code)data.logout.push(item.
 function logoutMilitary(){if(data.milCode)data.logout.push(data.milCode);data.milCode='';renderReport()}
 function updatePreview(){
  if(!data||!configs[mode])return;
- data.opsUser=$('opsUser').value;data.deputyUser=$('deputyUser').value;
+ data.opsUser=$('opsUser').value.trim();data.deputyUser=$('deputyUser').value.trim();
  let cfg=configs[mode],lines=[
  cfg.shift,'',
- 'مركز العمليات '+(mode==='los'?'لوس':'الميناء')+'   :  <@كوبي يوزر>',
- 'نائب مركز العمليات   :  <@كوبي يوزر>',
+ 'مركز العمليات '+(mode==='los'?'لوس':'الميناء')+'   :  '+(data.opsUser?'<@'+data.opsUser+'>':'<@كوبي يوزر آيدي>'),
+ 'نائب مركز العمليات   :  '+(data.deputyUser?'<@'+data.deputyUser+'>':'<@كوبي يوزر آيدي>'),
  '',
  '—————————————————',
  '',
